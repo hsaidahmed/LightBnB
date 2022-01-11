@@ -1,3 +1,6 @@
+CREATE DATABASE lightbnb;
+\c lightbnb
+
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS reservations CASCADE;
@@ -22,7 +25,6 @@ CREATE TABLE properties (
   parking_spaces INTEGER  NOT NULL DEFAULT 0,
   number_of_bathrooms INTEGER  NOT NULL DEFAULT 0,
   number_of_bedrooms INTEGER  NOT NULL DEFAULT 0,
-
   country VARCHAR(255) NOT NULL,
   street VARCHAR(255) NOT NULL,
   city VARCHAR(255) NOT NULL,
