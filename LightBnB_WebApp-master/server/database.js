@@ -123,12 +123,51 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
  const getAllProperties = (options, limit = 10) => {
+  const array = [];
+
+  let query = `
+  SELECT properties.*, avg(property_reviews.rating) as average_rating
+  FROM properties
+  LEFT JOIN property_reviews ON properties.id = property_id `;
+
+  if (options.city) {
+    array.push(`%${options.city}%`);
+    query += `AND properties.city LIKE $${array.length} `;
+  }
+
+  if (options.owner_id) {
+    array.push(`${options.owner_id}`);
+    query += `AND properties.owner_id = $${array.length} `;
+  }
+
+  if (options.minimum_price_per_night) {
+    array.push(options.minimum_price_per_night);
+    query += `AND properties.cost_per_night >= $${array.length} `;
+  }
+
+  if (options.maximum_price_per_night) {
+    array.push(options.maximum_price_per_night);
+    query += `AND properties.cost_per_night <= $${array.length} `;
+  }
+
+  if (options.minimum_rating) {
+    array.push(options.minimum_rating);
+    query += `AND rating >= $${array.length} `;
+  }
+
+  array.push(limit);
+  query += `
+  GROUP BY properties.id
+  ORDER BY cost_per_night
+  LIMIT $${array.length};
+  `;
+
   return pool
-    .query(`SELECT * FROM properties LIMIT $1`, [limit])
-    .then((result) => result.rows)
-    .catch((err) => {
-      console.log(err.message);
-    });
+    .query(query, array)
+    .then((res) => {
+      return res.rows;
+    })
+    .catch((err) => console.error("query error", err.stack));
 };
 exports.getAllProperties = getAllProperties;
 
